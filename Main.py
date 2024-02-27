@@ -7,12 +7,17 @@ import torch.optim as optim
 from tqdm import tqdm
 from torchvision import transforms
 from torch.utils.data import random_split
+from NUNet import NUNet
+
+from FNUNet import FNUNet
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print ("Running on "+ str(device))
+torch.cuda.empty_cache()
 
 transform = transforms.Compose([
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.0, 0.0, 0.0], std=[0.5, 0.5, 0.5])
 ])
 
 def custom_loss_function(output, target, height, width):
@@ -50,7 +55,7 @@ def Main():
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=1
+        default=3
     )
     parser.add_argument(
         "--num_epochs",
@@ -77,7 +82,11 @@ def Main():
         type=float,
         default=0.15
     )
-     
+    parser.add_argument(
+        "--Augmentation",
+        type=bool,
+        default=True
+    )
     options = parser.parse_args()
 
     datset_path = options.dataset_path
@@ -90,7 +99,7 @@ def Main():
     width = options.width
     TrainSplit = options.TrainSplit
     ValidationSplit = options.ValidationSplit
- 
+    Augmentation_flag = options.Augmentation # TO-DO
     ###################################################################################
 
     dataset = Surface_Dataset(datset_path, image_suffix, depthMap_suffix, transform) 
@@ -108,7 +117,7 @@ def Main():
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
 
-    model = UNet().to(device)
+    model = FNUNet().to(device)# NUNet().to(device) # UNet().to(device)
 
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)

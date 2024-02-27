@@ -29,5 +29,7 @@ class Surface_Dataset(Dataset):
         # Load depth map
         depth_data = np.load(depth_map_path)
         depthMap = depth_data['arr_0']
+        normalized_depthmap = (depthMap - depthMap.mean()) / depthMap.std()
         
-        return image, depthMap 
+        
+        return image, normalized_depthmap 
