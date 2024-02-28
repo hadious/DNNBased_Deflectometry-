@@ -7,9 +7,7 @@ import torch.optim as optim
 from tqdm import tqdm
 from torchvision import transforms
 from torch.utils.data import random_split
-from NUNet import NUNet
-
-from FNUNet import FNUNet
+from Test_NUNet import NUNet
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print ("Running on "+ str(device))
@@ -17,6 +15,7 @@ torch.cuda.empty_cache()
 
 transform = transforms.Compose([
     transforms.ToTensor(),
+    # transforms.Resize((, )),
     transforms.Normalize(mean=[0.0, 0.0, 0.0], std=[0.5, 0.5, 0.5])
 ])
 
@@ -117,7 +116,19 @@ def Main():
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
 
-    model = FNUNet().to(device)# NUNet().to(device) # UNet().to(device)
+
+    options ={
+    # -- U-Net Options -- #
+    'unet_conv_filters': [16, 32, 64, 64],  # Number of filters in the U-Net.
+    'conv_kernel_size': (3, 3),  # Size of convolutional kernels.
+    'conv_stride_rate': (1, 1),  # Stride rate of convolutional kernels.
+    'conv_dilation_rate': (1, 1),  # Dilation rate of convolutional kernels.
+    'conv_padding': (1, 1),  # Number of padded pixels in convolutional layers.
+    'conv_padding_style': 'zeros',  # Style of padding.
+    'n_classes': 1 # Number of output channels
+    }
+
+    model =   UNet(options).to(device) # NUNet().to(device) # UNet().to(device)
 
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)

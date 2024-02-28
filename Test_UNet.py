@@ -6,14 +6,12 @@ class UNetConvBlock(nn.Module):
     def __init__(self, in_size, out_size, kernel_size=3, activation=F.relu):
         super(UNetConvBlock, self).__init__()
         self.conv = nn.Conv2d(in_size, out_size, kernel_size, padding=1)
-        self.bn = nn.BatchNorm2d(out_size)
         self.conv2 = nn.Conv2d(out_size, out_size, kernel_size, padding=1)
-        self.bn2 = nn.BatchNorm2d(out_size)
         self.activation = activation
 
     def forward(self, x):
-        out = self.activation(self.bn(self.conv(x)))
-        out = self.activation(self.bn2(self.conv2(out)))
+        out = self.activation(self.conv(x))
+        out = self.activation(self.conv2(out))
         return out
 
 class UNetUpBlock(nn.Module):
@@ -21,21 +19,19 @@ class UNetUpBlock(nn.Module):
         super(UNetUpBlock, self).__init__()
         self.up = nn.ConvTranspose2d(in_size, out_size, 2, stride=2)
         self.conv = nn.Conv2d(in_size, out_size, kernel_size, padding=1)
-        self.bn = nn.BatchNorm2d(out_size)
         self.conv2 = nn.Conv2d(out_size, out_size, kernel_size, padding=1)
-        self.bn2 = nn.BatchNorm2d(out_size)
         self.activation = activation
 
     def forward(self, x, bridge):
         up = self.up(x)
         out = torch.cat([up, bridge], 1)
-        out = self.activation(self.bn(self.conv(out)))
-        out = self.activation(self.bn2(self.conv2(out)))
+        out = self.activation(self.conv(out))
+        out = self.conv2(out)
         return out
 
-class NUNet(nn.Module):
+class UNet(nn.Module):
     def __init__(self):
-        super(NUNet, self).__init__()
+        super(UNet, self).__init__()
 
         self.activation = F.tanh
         
